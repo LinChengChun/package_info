@@ -8,8 +8,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -19,45 +17,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** PackageInfoPlugin */
-public class PackageInfoPlugin implements MethodCallHandler, FlutterPlugin {
-  private Context applicationContext;
-  private MethodChannel methodChannel;
+public class PackageInfoPlugin implements MethodCallHandler {
+  private final Registrar mRegistrar;
 
   /** Plugin registration. */
   public static void registerWith(Registrar registrar) {
-    final PackageInfoPlugin instance = new PackageInfoPlugin();
-    instance.onAttachedToEngine(registrar.context(), registrar.messenger());
+    final MethodChannel channel =
+        new MethodChannel(registrar.messenger(), "plugins.flutter.io/package_info");
+    channel.setMethodCallHandler(new PackageInfoPlugin(registrar));
   }
 
-  @Override
-  public void onAttachedToEngine(FlutterPluginBinding binding) {
-    onAttachedToEngine(
-        binding.getApplicationContext(), binding.getFlutterEngine().getDartExecutor());
-  }
-
-  private void onAttachedToEngine(Context applicationContext, BinaryMessenger messenger) {
-    this.applicationContext = applicationContext;
-    methodChannel = new MethodChannel(messenger, "plugins.flutter.io/package_info");
-    methodChannel.setMethodCallHandler(this);
-  }
-
-  @Override
-  public void onDetachedFromEngine(FlutterPluginBinding binding) {
-    applicationContext = null;
-    methodChannel.setMethodCallHandler(null);
-    methodChannel = null;
+  private PackageInfoPlugin(Registrar registrar) {
+    this.mRegistrar = registrar;
   }
 
   @Override
   public void onMethodCall(MethodCall call, Result result) {
     try {
+      Context context = mRegistrar.context();
       if (call.method.equals("getAll")) {
-        PackageManager pm = applicationContext.getPackageManager();
-        PackageInfo info = pm.getPackageInfo(applicationContext.getPackageName(), 0);
+        PackageManager pm = context.getPackageManager();
+        PackageInfo info = pm.getPackageInfo(context.getPackageName(), 0);
 
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<String, String>();
         map.put("appName", info.applicationInfo.loadLabel(pm).toString());
-        map.put("packageName", applicationContext.getPackageName());
+        map.put("packageName", context.getPackageName());
         map.put("version", info.versionName);
         map.put("buildNumber", String.valueOf(getLongVersionCode(info)));
 
@@ -70,11 +54,11 @@ public class PackageInfoPlugin implements MethodCallHandler, FlutterPlugin {
     }
   }
 
-  @SuppressWarnings("deprecation")
   private static long getLongVersionCode(PackageInfo info) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       return info.getLongVersionCode();
     }
+    //noinspection deprecation
     return info.versionCode;
   }
 }

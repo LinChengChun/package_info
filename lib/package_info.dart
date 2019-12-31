@@ -17,12 +17,6 @@ const MethodChannel _kChannel =
 /// print("Version is: ${packageInfo.version}");
 /// ```
 class PackageInfo {
-  /// Constructs an instance with the given values for testing. [PackageInfo]
-  /// instances constructed this way won't actually reflect any real information
-  /// from the platform, just whatever was passed in at construction time.
-  ///
-  /// See [fromPlatform] for the right API to get a [PackageInfo] that's
-  /// actually populated with real data.
   PackageInfo({
     this.appName,
     this.packageName,
@@ -30,23 +24,30 @@ class PackageInfo {
     this.buildNumber,
   });
 
-  static PackageInfo _fromPlatform;
+  static Future<PackageInfo> _fromPlatform;
 
   /// Retrieves package information from the platform.
   /// The result is cached.
   static Future<PackageInfo> fromPlatform() async {
-    if (_fromPlatform != null) {
-      return _fromPlatform;
-    }
+    if (_fromPlatform == null) {
+      final Completer<PackageInfo> completer = Completer<PackageInfo>();
 
-    final Map<String, dynamic> map =
-        await _kChannel.invokeMapMethod<String, dynamic>('getAll');
-    _fromPlatform = PackageInfo(
-      appName: map["appName"],
-      packageName: map["packageName"],
-      version: map["version"],
-      buildNumber: map["buildNumber"],
-    );
+      // TODO(amirh): remove this on when the invokeMethod update makes it to stable Flutter.
+      // https://github.com/flutter/flutter/issues/26431
+      // ignore: strong_mode_implicit_dynamic_method
+      _kChannel.invokeMethod('getAll').then((dynamic result) {
+        final Map<dynamic, dynamic> map = result;
+
+        completer.complete(PackageInfo(
+          appName: map["appName"],
+          packageName: map["packageName"],
+          version: map["version"],
+          buildNumber: map["buildNumber"],
+        ));
+      }, onError: completer.completeError);
+
+      _fromPlatform = completer.future;
+    }
     return _fromPlatform;
   }
 

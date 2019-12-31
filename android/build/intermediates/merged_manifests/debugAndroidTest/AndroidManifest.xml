@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.flutter.plugins.packageinfo.test" >
+
+    <uses-sdk
+        android:minSdkVersion="16"
+        android:targetSdkVersion="16" />
+
+    <instrumentation
+        android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:functionalTest="false"
+        android:handleProfiling="false"
+        android:label="Tests for io.flutter.plugins.packageinfo.test"
+        android:targetPackage="io.flutter.plugins.packageinfo.test" />
+
+    <application android:debuggable="true" >
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+</manifest>
