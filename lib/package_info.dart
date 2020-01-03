@@ -22,6 +22,7 @@ class PackageInfo {
     this.packageName,
     this.version,
     this.buildNumber,
+    this.flavor
   });
 
   static Future<PackageInfo> _fromPlatform;
@@ -43,6 +44,7 @@ class PackageInfo {
           packageName: map["packageName"],
           version: map["version"],
           buildNumber: map["buildNumber"],
+          flavor: map['flavor']
         ));
       }, onError: completer.completeError);
 
@@ -62,4 +64,6 @@ class PackageInfo {
 
   /// The build number. `CFBundleVersion` on iOS, `versionCode` on Android.
   final String buildNumber;
+
+  final String flavor;
 }

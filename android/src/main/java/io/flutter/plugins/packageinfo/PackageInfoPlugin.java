@@ -16,6 +16,9 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.flutter.plugins.packageinfo.BuildConfig;
+import android.util.Log;
+
 /** PackageInfoPlugin */
 public class PackageInfoPlugin implements MethodCallHandler {
   private final Registrar mRegistrar;
@@ -44,6 +47,8 @@ public class PackageInfoPlugin implements MethodCallHandler {
         map.put("packageName", context.getPackageName());
         map.put("version", info.versionName);
         map.put("buildNumber", String.valueOf(getLongVersionCode(info)));
+        Log.e("cclin", "get flavor: "+BuildConfig.FLAVOR);
+        map.put("flavor", "get flavor: "+BuildConfig.FLAVOR);
 
         result.success(map);
       } else {
