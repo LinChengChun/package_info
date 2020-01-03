@@ -16,7 +16,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.flutter.plugins.packageinfo.BuildConfig;
+import java.lang.reflect.Field;
 import android.util.Log;
 
 /** PackageInfoPlugin */
@@ -47,8 +47,9 @@ public class PackageInfoPlugin implements MethodCallHandler {
         map.put("packageName", context.getPackageName());
         map.put("version", info.versionName);
         map.put("buildNumber", String.valueOf(getLongVersionCode(info)));
-        Log.e("cclin", "get flavor: "+BuildConfig.FLAVOR);
-        map.put("flavor", "get flavor: "+BuildConfig.FLAVOR);
+        String flavor = String.valueOf(getBuildConfigValue(context, "FLAVOR"));
+        Log.e("cclin", "get flavor: "+flavor);
+        map.put("flavor", flavor);
 
         result.success(map);
       } else {
@@ -65,5 +66,20 @@ public class PackageInfoPlugin implements MethodCallHandler {
     }
     //noinspection deprecation
     return info.versionCode;
+  }
+
+  public static Object getBuildConfigValue(Context context, String fieldName) {
+    try {
+        Class<?> clazz = Class.forName(context.getPackageName() + ".BuildConfig");
+        Field field = clazz.getField(fieldName);
+        return field.get(null);
+    } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+    } catch (NoSuchFieldException e) {
+        e.printStackTrace();
+    } catch (IllegalAccessException e) {
+        e.printStackTrace();
+    }
+    return null;
   }
 }
