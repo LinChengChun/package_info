@@ -48,7 +48,6 @@ public class PackageInfoPlugin implements MethodCallHandler {
         map.put("version", info.versionName);
         map.put("buildNumber", String.valueOf(getLongVersionCode(info)));
         String flavor = String.valueOf(getBuildConfigValue(context, "FLAVOR"));
-        Log.e("cclin", "get flavor: "+flavor);
         map.put("flavor", flavor);
 
         result.success(map);
